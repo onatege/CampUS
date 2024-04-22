@@ -13,7 +13,7 @@ namespace CampUS.Service.Mapping
 {
     public class MapProfile : Profile
     {
-        private readonly IPostRepository _PostRepository;
+        private readonly IPostRepository _postRepository;
 
         public MapProfile()
         {

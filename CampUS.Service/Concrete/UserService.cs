@@ -16,14 +16,14 @@ namespace CampUS.Service.Concrete
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IPostRepository _PostRepository;
+        private readonly IPostRepository _postRepository;
         private readonly ICacheService _cacheService;
 
         public UserService(IUserRepository userRepository, IMapper mapper, IUnitOfWork unitOfWork, IPostRepository PostRepository, ICacheService cacheService)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _PostRepository = PostRepository;
+            _postRepository = PostRepository;
             _unitOfWork = unitOfWork;
             _cacheService = cacheService;
         }
@@ -60,7 +60,7 @@ namespace CampUS.Service.Concrete
                 throw new NotFoundException($"UserId({id}) not found!");
             }
             var userProfileDto = _mapper.Map<GetUserProfileDto>(user);
-            userProfileDto.Posts = await _PostRepository.GetUserPostsWithLikeCountAsync(id);
+            userProfileDto.Posts = await _postRepository.GetUserPostsWithLikeCountAsync(id);
 
             return userProfileDto;
         }

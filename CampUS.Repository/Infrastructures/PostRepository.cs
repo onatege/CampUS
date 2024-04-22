@@ -2,6 +2,9 @@
 using CampUS.Core.Abstracts;
 using CampUS.Core.Models;
 using CampUS.DTO.Response.Post;
+using CampUS.DTO.Response.User;
+using CampUS.DTO.Response.Reply;
+using CampUS.DTO.Response.Tag;
 
 namespace CampUS.Repository.Infrastructures
 {
@@ -58,6 +61,40 @@ namespace CampUS.Repository.Infrastructures
                 .FirstOrDefaultAsync(t => t.Id == PostId);
 
             return Post;
+        }
+
+        public async Task<PostDto> GeneratePostDto(Post post)
+        {
+            var postDto = new PostDto
+            {
+                Id = post.Id,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                LikeCount = post.Likes?.Count ?? 0,
+                Tags = post.Tags?.Select(t => new TagResponseDto
+                {
+                    Name = t.Name
+                }).ToList(),
+                User = new UserResponseDto
+                {
+                    UserName = post.User.UserName,
+                    DisplayName = post.User.DisplayName,
+                    ProfileImg = post.User.ProfileImg
+                },
+                Replies = post.Replies?.Select(reply => new ReplyResponseDto
+                {
+                    User = new UserResponseDto
+                    {
+                        UserName = reply.User.UserName,
+                        DisplayName = reply.User.DisplayName,
+                        ProfileImg = reply.User.ProfileImg
+                    },
+                    Content = reply.Content,
+                    CreatedAt = reply.CreatedAt
+                }).ToList()
+            };
+
+            return postDto;
         }
     }
 }

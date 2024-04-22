@@ -13,14 +13,14 @@ namespace CampUS.Service.Concrete
         private readonly ITagRepository _tagRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IPostRepository _PostRepository;
+        private readonly IPostRepository _postRepository;
 
         public TagService(ITagRepository tagRepository, IMapper mapper, IUnitOfWork unitOfWork, IPostRepository PostRepository)
         {
             _tagRepository = tagRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
-            _PostRepository = PostRepository;
+            _postRepository = PostRepository;
         }
         public async Task<List<TagDto>> GetAllTagsAsync()
         {
@@ -37,7 +37,7 @@ namespace CampUS.Service.Concrete
                 throw new NotFoundException($"TagId({id}) not found");
             }
 			var tagDto = _mapper.Map<TagDto>(tag);
-			tagDto.Posts = await _PostRepository.GetTagPostsWithLikeCountAsync(id);
+			tagDto.Posts = await _postRepository.GetTagPostsWithLikeCountAsync(id);
 			return tagDto;
         }
 

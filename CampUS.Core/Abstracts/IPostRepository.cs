@@ -9,5 +9,6 @@ namespace CampUS.Core.Abstracts
 		Task<List<PostResponseDto>> GetUserPostsWithLikeCountAsync(int id);
 		Task<List<PostResponseDto>> GetTagPostsWithLikeCountAsync(int id);
 		Task<Post> GetPostByIdAsync(int PostId);
+        Task<PostDto> GeneratePostDto(Post post);
     }
 }

@@ -1,8 +1,6 @@
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Microsoft.Extensions.Configuration;
 using System.Reflection;
 using CampUS.Caching.Abstracts;
 using CampUS.Caching.Concretes;
@@ -11,12 +9,10 @@ using CampUS.Core.Interfaces;
 using CampUS.Middlewares;
 using CampUS.Repository;
 using CampUS.Repository.Infrastructures;
-using CampUS.Repository.Repositories;
 using CampUS.Service.Concrete;
 using CampUS.Service.Filters;
 using CampUS.Service.Mapping;
 using CampUS.Service.Validations;
-using Microsoft.IdentityModel.Tokens;
 using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);

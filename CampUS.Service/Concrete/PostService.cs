@@ -8,126 +8,108 @@ using CampUS.DTO.Response.Tag;
 using CampUS.DTO.Response.Post;
 using CampUS.DTO.Response.User;
 using CampUS.Service.Exceptions;
+using CampUS.Caching.Abstracts;
+using CampUS.Caching.Keys;
+using Microsoft.Extensions.Hosting;
 
 namespace CampUS.Service.Concrete
 {
     public class PostService : Service<Post>, IPostService
 	{
-		private readonly IPostRepository _PostRepository;
+		private readonly IPostRepository _postRepository;
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
         private readonly ITagRepository _tagRepository;
+        private readonly ICacheService _cacheService;
 
-        public PostService(IGenericRepository<Post> repository, IUnitOfWork unitOfWork, IPostRepository PostRepository, IMapper mapper, ITagRepository tagRepository) : base(repository, unitOfWork)
+        public PostService(IGenericRepository<Post> repository, IUnitOfWork unitOfWork, IPostRepository postRepository, IMapper mapper, ITagRepository tagRepository, ICacheService cacheService) : base(repository, unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _PostRepository = PostRepository;
+            _postRepository = postRepository;
             _mapper = mapper;
             _tagRepository = tagRepository;
+            _cacheService = cacheService;
         }
 
         public async Task AddPostAsync(AddPostDto addPostDto)
 		{
-			var Post = _mapper.Map<Post>(addPostDto);
-			await _PostRepository.AddAsync(Post);
+			var post = _mapper.Map<Post>(addPostDto);
+			await _postRepository.AddAsync(post);
 			await _unitOfWork.CommitAsync();
-		}
-
-        public async Task<PostDto> GetPostByIdAsync(int PostId)
-        {
-            var Post = await _PostRepository.GetPostByIdAsync(PostId);
-
-            if (Post == null)
-            {
-                throw new NotFoundException($"PostId({PostId}) not found.");
-            }
-
-            var PostDto = new PostDto
-            {
-                Id = Post.Id,
-                Content = Post.Content,
-                CreatedAt = Post.CreatedAt,
-                LikeCount = Post.Likes?.Count ?? 0,
-                Tags = Post.Tags?.Select(t => new TagResponseDto
-                {
-                    Name = t.Name
-                }).ToList(),
-                User = new UserResponseDto
-                {
-                    UserName = Post.User.UserName,
-                    DisplayName = Post.User.DisplayName,
-                    ProfileImg = Post.User.ProfileImg
-                },
-                Replies = Post.Replies?.Select(reply => new ReplyResponseDto
-                {
-                    User = new UserResponseDto
-                    {
-                        UserName = reply.User.UserName,
-                        DisplayName = reply.User.DisplayName,
-                        ProfileImg = reply.User.ProfileImg
-                    },
-                    Content = reply.Content,
-                    CreatedAt = reply.CreatedAt
-                }).ToList()
-            };
-
-            return PostDto;
         }
 
+        public async Task<PostDto> GetPostByIdAsync(int postId)
+        {
+
+            if (await _postRepository.AnyAsync(p => p.Id == postId))
+            {
+                var post = await _postRepository.GetPostByIdAsync(postId);
+                var postDto = await _postRepository.GeneratePostDto(post);
+
+                return postDto;
+            }
+            else
+            {
+                throw new NotFoundException($"PostId({postId}) not found!");
+            }
+        }
 
         public async Task<List<PostDto>> GetAllPostAsync()
 		{
-			var Post = await _PostRepository.GetPosts();
+			var Post = await _postRepository.GetPosts();
 			var PostDto = _mapper.Map<List<PostDto>>(Post);
 			return PostDto;
 		}
 
 		public async Task RemovePostAsync(int id)
 		{
-			var Post = await _PostRepository.GetByIdAsync(id);
+			var Post = await _postRepository.GetByIdAsync(id);
             if(Post == null)
             {
                 throw new NotFoundException($"PostId({id}) not found.");
             }
-			_PostRepository.Remove(Post);
+			_postRepository.Remove(Post);
 			await _unitOfWork.CommitAsync();
 		}
 
-        public async Task AddTagToPostAsync(int PostId, int tagId)
+        public async Task AddTagToPostAsync(int postId, int tagId)
         {
-            var Post = await _PostRepository.GetPostByIdAsync(PostId);
+            var post = await _postRepository.GetPostByIdAsync(postId);
             var tag = await _tagRepository.GetTagByIdAsync(tagId);
-            if (Post == null || tag == null)
+            if (post == null || tag == null)
             {
-                throw new NotFoundException($"PostId({PostId}) or TagId({tagId}) not found.");
+                throw new NotFoundException($"PostId({postId}) or TagId({tagId}) not found.");
             }
-            Post.Tags.Add(tag);
+            post.Tags.Add(tag);
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task LikePostAsync(int userId, int PostId)
+        public async Task LikePostAsync(int userId, int postId)
         {
-            var Post = await _PostRepository.GetPostByIdAsync(PostId);
-            if (Post == null)
+            if (await _postRepository.AnyAsync(p => p.Id == postId))
             {
-                throw new NotFoundException($"PostId({PostId}) not found.");
-            }
-
-            var existingLike = Post.Likes.FirstOrDefault(l => l.UserId == userId && l.PostId == PostId);
-            if (existingLike == null)
-            {
-                var newLike = new LikePostDto
+                var post = await _postRepository.GetPostByIdAsync(postId);
+                var existingLike = post.Likes.FirstOrDefault(l => l.UserId == userId && l.PostId == postId);
+                if (existingLike == null)
                 {
-                    PostId = PostId,
-                    UserId = userId,
-                };
-                var createdLike = _mapper.Map<Like>(newLike);
-                Post.Likes.Add(createdLike);
+                    var newLike = new LikePostDto
+                    {
+                        PostId = postId,
+                        UserId = userId,
+                    };
+                    var createdLike = _mapper.Map<Like>(newLike);
+                    post.Likes.Add(createdLike);
+                }
+                else
+                {
+                    post.Likes.Remove(existingLike);
+                }
             }
             else
             {
-                Post.Likes.Remove(existingLike);
+                throw new NotFoundException($"PostId({postId}) not found.");
             }
+
             await _unitOfWork.CommitAsync();
         }
     }

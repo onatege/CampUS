@@ -18,12 +18,13 @@ namespace CampUS.Core.Models
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CreatedAt { get; set; }
         [IgnoreDataMember]
-        public virtual ICollection<Post>? Posts { get; }
+        public virtual ICollection<Post>? Posts { get; set;}
         [IgnoreDataMember]
         public virtual ICollection<Like>? Likes { get; set; }
         [IgnoreDataMember]
         public virtual ICollection<User>? Followers { get; set; }
         [IgnoreDataMember]
         public virtual ICollection<User>? Following { get; set; }
+        public virtual ICollection<Club> Clubs { get; set; }
     }
 }

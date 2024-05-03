@@ -11,6 +11,8 @@ namespace CampUS.Repository
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Club> Clubs { get; set; }
+        public DbSet<ClubPost> ClubPosts { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Reply> Replies { get; set; }
@@ -21,7 +23,10 @@ namespace CampUS.Repository
 
             modelBuilder.Entity<User>().HasQueryFilter(x => x.IsActive && !x.IsDeleted);
             modelBuilder.Entity<Post>().HasQueryFilter(x => !x.IsDeleted);
-            
+            modelBuilder.Entity<Reply>().HasQueryFilter(r => !r.Post.IsDeleted);
+            modelBuilder.Entity<Club>().HasQueryFilter(c => !c.IsDeleted);
+            modelBuilder.Entity<ClubPost>().HasQueryFilter(cp => !cp.IsDeleted);
+
             var relationships = modelBuilder.Model.GetEntityTypes()
                 .SelectMany(e => e.GetForeignKeys());
 

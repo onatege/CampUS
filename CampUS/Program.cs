@@ -28,7 +28,11 @@ builder.Services.AddFluentValidation(v =>
     v.RegisterValidatorsFromAssemblyContaining<AddUserValidator>();
     v.RegisterValidatorsFromAssemblyContaining<UpdateUserValidator>();
     v.RegisterValidatorsFromAssemblyContaining<AddPostValidator>();
-	
+	v.RegisterValidatorsFromAssemblyContaining<AddClubValidator>();
+    v.RegisterValidatorsFromAssemblyContaining<UpdateClubValidator>();
+    v.RegisterValidatorsFromAssemblyContaining<AddMemberValidator>();
+
+
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -44,7 +48,10 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ITagService, TagService>();
-
+builder.Services.AddScoped<IClubRepository, ClubRepository>();
+builder.Services.AddScoped<IClubPostRepository, ClubPostRepository>();
+builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<IClubPostService, ClubPostService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 builder.Services.AddScoped(typeof(NotFoundFilter<>));

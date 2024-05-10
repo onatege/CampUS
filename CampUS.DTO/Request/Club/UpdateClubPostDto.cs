@@ -1,6 +1,6 @@
 ﻿namespace CampUS.DTO.Request.Club
 {
-    public class AddClubPostDto
+    public class UpdateClubPostDto
     {
         public string Content { get; set; }
     }

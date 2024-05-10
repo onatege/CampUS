@@ -32,7 +32,7 @@ namespace CampUS.Repository
 
             foreach (var relationship in relationships)
             {
-                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+                relationship.DeleteBehavior = DeleteBehavior.Cascade;
             }
             base.OnModelCreating(modelBuilder);
         }

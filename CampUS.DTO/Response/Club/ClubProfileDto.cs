@@ -7,6 +7,6 @@
         public string Description { get; set; }
         public string ProfileImg { get; set; }
         public int MemberCount { get; set; }
-        public List<ClubPostDto> Posts { get; set; }
+        public List<ClubPostDto> ClubPosts { get; set; }
     }
 }

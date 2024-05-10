@@ -9,8 +9,11 @@ namespace CampUS.Core.Abstracts
 		Task AddPostAsync(AddPostDto addPostDto);
 		Task<PostDto> GetPostByIdAsync(int PostId);
         Task<List<PostDto>> GetAllPostAsync();
-		Task RemovePostAsync(int id);
+		Task<UpdatePostDto> UpdatePostAsync(int postId, UpdatePostDto updatePostDto);
+
+        Task RemovePostAsync(int id);
 		Task AddTagToPostAsync(int id, int tagId);
-		Task LikePostAsync(int userId, int PostId);
+		Task LikePostAsync(int userId, int postId);
+		Task RemoveLikeAsync(int userId, int postId);
     }
 }

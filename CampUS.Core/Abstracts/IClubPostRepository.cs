@@ -9,6 +9,6 @@ namespace CampUS.Core.Abstracts
     public interface IClubPostRepository : IGenericRepository<ClubPost>
     {
         Task<IEnumerable<ClubPost>> GetClubPostsAsync(int clubId);
-        Task<ClubPost> GetClubPostByIdAsync(int postId);
+        Task<ClubPost> GetClubPostByIdAsync(int clubPostId);
     }
 }

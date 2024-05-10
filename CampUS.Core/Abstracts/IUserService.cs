@@ -9,6 +9,8 @@ namespace CampUS.Core.Interfaces
         Task<GetUserProfileDto> GetUserWithFollowersAndPostsByIdAsync(int id);
         //Task SoftDeleteUserAsync(DeleteDto deleteUserDto);
         Task<UpdateUserDto> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
+        Task FollowUserAsync(int userId, int targetUserId);
+        Task UnfollowUserAsync(int userId, int targetUserId);
         Task DeactivateUserAsync(int userId);
         Task ActivateUserAsync(int userId);
         Task RemoveUserAsync(int id);

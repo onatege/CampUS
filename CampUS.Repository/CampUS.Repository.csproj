@@ -25,4 +25,8 @@
     <ProjectReference Include="..\CampUS.DTO\CampUS.DTO.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

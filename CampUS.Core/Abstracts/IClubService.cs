@@ -11,7 +11,7 @@ namespace CampUS.Core.Abstracts
         Task UpdateClubAsync(int clubId, UpdateClubDto updateClubDto);
         Task DeleteClubAsync(int clubId);
         Task AddMemberAsync(int clubId, string username);
-        Task RemoveMemberAsync(int clubId, int userId);
-        Task<ClubProfileDto> GetClubProfileWithPostsAsync(int clubId);
+        Task RemoveMemberAsync(int clubId, string username);
+        Task<ClubProfileDto> GetClubProfileWithMembersAndPostsAsync(int clubId);
     }
 }

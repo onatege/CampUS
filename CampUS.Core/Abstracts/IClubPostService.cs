@@ -7,8 +7,10 @@ namespace CampUS.Core.Abstracts
 {
     public interface IClubPostService
     {
-        Task AddClubPostAsync(AddClubPostDto addClubPostdto);
+        Task AddClubPostAsync(int clubId, AddClubPostDto addClubPostdto);
         Task<IEnumerable<ClubPostDto>> GetClubPostsAsync(int clubId);
-        Task<ClubPostDto> GetClubPostByIdAsync(int postId);
+        Task<ClubPostDto> GetClubPostByIdAsync(int clubPostId);
+        Task UpdateClubPostAsync(int postId, UpdateClubPostDto updateClubPostDto);
+        Task RemoveClubPostAsync(int clubPostId);
     }
 }

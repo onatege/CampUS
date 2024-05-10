@@ -11,5 +11,4 @@ public class ClubPost : IBaseEntity, IDeletable, IUpdatedAt, ICreatedAt
     public DateTime? DeletedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? CreatedAt { get; set; }
-    public virtual ICollection<Like>? Likes { get; set; }
 }

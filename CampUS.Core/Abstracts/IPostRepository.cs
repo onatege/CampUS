@@ -10,5 +10,8 @@ namespace CampUS.Core.Abstracts
 		Task<List<PostResponseDto>> GetTagPostsWithLikeCountAsync(int id);
 		Task<Post> GetPostByIdAsync(int PostId);
         Task<PostDto> GeneratePostDto(Post post);
+		Task AddLikeToPost(int postId, int userId);
+		Task RemoveLikeFromPost(int postId, int userId);
+		Task<bool> IsPostLikedByUser(int postId, int userId);
     }
 }

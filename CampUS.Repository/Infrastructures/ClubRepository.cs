@@ -11,11 +11,13 @@ namespace CampUS.Repository.Infrastructures
 {
     public class ClubRepository : GenericRepository<Club>, IClubRepository
     {
+        private readonly DbSet<Club> _club;
         public ClubRepository(AppDbContext context) : base(context)
         {
+            _club = context.Set<Club>();
         }
 
-        public async Task<Club> GetClubWithMembersAsync(int clubId)
+        public async Task<Club> GetClubWithMembersAndPostsAsync(int clubId)
         {
             return await _context.Clubs
                                  .Include(c => c.Members)
@@ -23,16 +25,11 @@ namespace CampUS.Repository.Infrastructures
                                  .FirstOrDefaultAsync(c => c.Id == clubId && !c.IsDeleted);
         }
 
-        public async Task RemoveByIdAsync(int clubId)
+        public async Task<Club> GetClubWithMembersByIdAsync(int clubId)
         {
-            var club = await _context.Clubs.FindAsync(clubId);
-            if (club != null)
-            {
-                club.IsDeleted = true;
-                club.DeletedAt = DateTime.UtcNow;
-                _context.Clubs.Update(club);
-                await _context.SaveChangesAsync();
-            }
+            return await _context.Clubs
+                .Include(c => c.Members)  // Eager load the Members collection
+                .FirstOrDefaultAsync(c => c.Id == clubId);
         }
     }
 

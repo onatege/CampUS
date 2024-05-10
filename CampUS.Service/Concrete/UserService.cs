@@ -96,6 +96,53 @@ namespace CampUS.Service.Concrete
             return updatedUserDto;
         }
 
+        public async Task FollowUserAsync(int userId, int targetUserId)
+        {
+            if (!await _userRepository.AnyAsync(u => u.Id == userId) ||
+                !await _userRepository.AnyAsync(u => u.Id == targetUserId))
+            {
+                throw new NotFoundException("One of the users not found.");
+            }
+
+            var user = await _userRepository.GetUserWithFollowersByIdAsync(userId);
+            var targetUser = await _userRepository.GetUserWithFollowersByIdAsync(targetUserId);
+
+            if (!user.Following.Any(u => u.Id == targetUserId))
+            {
+                user.Following.Add(targetUser);
+                targetUser.Followers.Add(user);
+                await _unitOfWork.CommitAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException("Already following this user.");
+            }
+        }
+
+        public async Task UnfollowUserAsync(int userId, int targetUserId)
+        {
+            if (!await _userRepository.AnyAsync(u => u.Id == userId) ||
+                !await _userRepository.AnyAsync(u => u.Id == targetUserId))
+            {
+                throw new NotFoundException("One of the users not found.");
+            }
+
+            var user = await _userRepository.GetUserWithFollowersByIdAsync(userId);
+            var targetUser = await _userRepository.GetUserWithFollowersByIdAsync(targetUserId);
+
+            if (user.Following.Any(u => u.Id == targetUserId))
+            {
+                var followingUser = user.Following.First(u => u.Id == targetUserId);
+                user.Following.Remove(followingUser);
+                targetUser.Followers.Remove(user);
+                await _unitOfWork.CommitAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException("Not following this user.");
+            }
+        }
+
         public async Task DeactivateUserAsync(int userId)
         {
             var cacheKey = string.Format(ConstantCacheKeys.UserKey, userId);
@@ -157,7 +204,7 @@ namespace CampUS.Service.Concrete
             {
                 throw new NotFoundException($"UserId({id}) not found!");
             }
-            if (user != null)
+            if (!await _userRepository.AnyAsync(u => u.Id == id))
             {
                 _userRepository.Remove(user);
                 await _unitOfWork.CommitAsync();

@@ -11,6 +11,8 @@ using CampUS.Service.Exceptions;
 using CampUS.Caching.Abstracts;
 using CampUS.Caching.Keys;
 using Microsoft.Extensions.Hosting;
+using CampUS.Repository.Infrastructures;
+using CampUS.Core.Interfaces;
 
 namespace CampUS.Service.Concrete
 {
@@ -21,13 +23,15 @@ namespace CampUS.Service.Concrete
 		private readonly IMapper _mapper;
         private readonly ITagRepository _tagRepository;
         private readonly ICacheService _cacheService;
+        private readonly IUserRepository _userRepository;
 
-        public PostService(IGenericRepository<Post> repository, IUnitOfWork unitOfWork, IPostRepository postRepository, IMapper mapper, ITagRepository tagRepository, ICacheService cacheService) : base(repository, unitOfWork)
+        public PostService(IGenericRepository<Post> repository, IUnitOfWork unitOfWork, IUserRepository userRepository, IPostRepository postRepository, IMapper mapper, ITagRepository tagRepository, ICacheService cacheService) : base(repository, unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _postRepository = postRepository;
             _mapper = mapper;
             _tagRepository = tagRepository;
+            _userRepository = userRepository;
             _cacheService = cacheService;
         }
 
@@ -61,7 +65,36 @@ namespace CampUS.Service.Concrete
 			return PostDto;
 		}
 
-		public async Task RemovePostAsync(int id)
+        public async Task<UpdatePostDto> UpdatePostAsync(int postId, UpdatePostDto updatePostDto)
+        {
+            string cacheKey = string.Format(ConstantCacheKeys.PostKey, postId);
+            Post post = null;
+
+            if (await _cacheService.AnyAsync(cacheKey))
+            {
+                post = await _cacheService.GetAsync<Post>(cacheKey);
+            }
+            else if (await _postRepository.AnyAsync(p => p.Id == postId))
+            {
+                post = await _postRepository.GetPostByIdAsync(postId);
+            }
+            else
+            {
+                throw new NotFoundException($"PostId({postId}) not found!");
+            }
+
+            _mapper.Map(updatePostDto, post);
+
+            _postRepository.UpdateAsync(post);
+            await _unitOfWork.CommitAsync();
+            await _cacheService.SetAsync(cacheKey, post, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2));
+
+            var updatedPostDto = _mapper.Map<UpdatePostDto>(post);
+
+            return updatedPostDto;
+        }
+
+        public async Task RemovePostAsync(int id)
 		{
 			var Post = await _postRepository.GetByIdAsync(id);
             if(Post == null)
@@ -86,31 +119,37 @@ namespace CampUS.Service.Concrete
 
         public async Task LikePostAsync(int userId, int postId)
         {
-            if (await _postRepository.AnyAsync(p => p.Id == postId))
-            {
-                var post = await _postRepository.GetPostByIdAsync(postId);
-                var existingLike = post.Likes.FirstOrDefault(l => l.UserId == userId && l.PostId == postId);
-                if (existingLike == null)
-                {
-                    var newLike = new LikePostDto
-                    {
-                        PostId = postId,
-                        UserId = userId,
-                    };
-                    var createdLike = _mapper.Map<Like>(newLike);
-                    post.Likes.Add(createdLike);
-                }
-                else
-                {
-                    post.Likes.Remove(existingLike);
-                }
-            }
-            else
+            if (!await _postRepository.AnyAsync(p => p.Id == postId))
             {
                 throw new NotFoundException($"PostId({postId}) not found.");
             }
 
-            await _unitOfWork.CommitAsync();
+            // Checking the existence of like within the repository method
+            var isLiked = await _postRepository.IsPostLikedByUser(postId, userId);
+            if (!isLiked)
+            {
+                await _postRepository.AddLikeToPost(postId, userId);
+                await _unitOfWork.CommitAsync();
+            }
         }
+        public async Task RemoveLikeAsync(int userId, int postId)
+        {
+            if (!await _postRepository.AnyAsync(p => p.Id == postId))
+            {
+                throw new NotFoundException($"PostId({postId}) not found.");
+            }
+
+            // Checking and removing the like within the repository
+            if (await _postRepository.IsPostLikedByUser(postId, userId))
+            {
+                await _postRepository.RemoveLikeFromPost(postId, userId);
+                await _unitOfWork.CommitAsync();
+            }
+            else
+            {
+                throw new NotFoundException("Like not found.");
+            }
+        }
+
     }
 }

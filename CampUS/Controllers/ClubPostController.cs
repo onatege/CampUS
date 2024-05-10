@@ -3,6 +3,9 @@ using System.Net;
 using CampUS.DTO.Request.Club;
 using CampUS.DTO.Response;
 using CampUS.Core.Abstracts;
+using CampUS.Service.Concrete;
+using CampUS.DTO.Response.Club;
+using CampUS.Core.Models;
 
 namespace CampUS.Controllers
 {
@@ -18,9 +21,9 @@ namespace CampUS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddClubPost([FromBody] AddClubPostDto dto)
+        public async Task<IActionResult> AddClubPost(int clubId, [FromBody] AddClubPostDto ClubPostDto)
         {
-            await _clubPostService.AddClubPostAsync(dto);
+            await _clubPostService.AddClubPostAsync(clubId, ClubPostDto);
             return Ok(CustomResponseDto.Success("Club post added successfully.", HttpStatusCode.Created));
         }
 
@@ -32,10 +35,24 @@ namespace CampUS.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> GetClubPostById(int postId)
+        public async Task<IActionResult> GetClubPostById(int clubPostId)
         {
-            var post = await _clubPostService.GetClubPostByIdAsync(postId);
+            var post = await _clubPostService.GetClubPostByIdAsync(clubPostId);
             return Ok(CustomResponseDto.Success(post, HttpStatusCode.OK));
+        }
+
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateClubPost(int clubPostId, [FromBody] UpdateClubPostDto updateClubPostDto)
+        {
+            await _clubPostService.UpdateClubPostAsync(clubPostId, updateClubPostDto);
+            return Ok(CustomResponseDto.Success("Club post updated successfully.", HttpStatusCode.OK));
+        }
+
+        [HttpDelete("[action]")]
+        public async Task<IActionResult> RemoveClubPost(int clubPostId)
+        {
+            await _clubPostService.RemoveClubPostAsync(clubPostId);
+            return Ok(CustomResponseDto.Success("Club post deleted successfully.", HttpStatusCode.OK));
         }
     }
 }

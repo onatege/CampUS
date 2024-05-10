@@ -24,9 +24,9 @@ namespace CampUS.Service.Concrete
         }
         public async Task<List<TagDto>> GetAllTagsAsync()
         {
-            var tags = _tagRepository.GetAll();
-            var tagDto = _mapper.Map<List<TagDto>>(tags);
-            return tagDto;
+            return (await _tagRepository.GetAllTags())
+                .Select(tag => _mapper.Map<TagDto>(tag))
+                .ToList();
         }
 
         public async Task<TagDto> GetTagByIdAsync(int id)

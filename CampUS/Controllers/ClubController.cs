@@ -48,16 +48,16 @@ namespace CampUS.Controllers
         }
 
         [HttpDelete("[action]")]
-        public async Task<IActionResult> RemoveMember(int clubId, int userId)
+        public async Task<IActionResult> RemoveMember(int clubId, [FromBody] AddClubMemberDto addMemberDto)
         {
-            await _clubService.RemoveMemberAsync(clubId, userId);
+            await _clubService.RemoveMemberAsync(clubId, addMemberDto.Username);
             return Ok(CustomResponseDto.Success("Member removed successfully.", HttpStatusCode.OK));
         }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> GetClubProfileWithPosts(int id)
         {
-            var clubProfile = await _clubService.GetClubProfileWithPostsAsync(id);
+            var clubProfile = await _clubService.GetClubProfileWithMembersAndPostsAsync(id);
             return Ok(CustomResponseDto.Success(clubProfile, HttpStatusCode.OK));
         }
     }

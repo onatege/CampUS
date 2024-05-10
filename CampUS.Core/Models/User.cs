@@ -1,9 +1,10 @@
 ﻿using System.Runtime.Serialization;
 using CampUS.Core.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace CampUS.Core.Models
 {
-    public class User : IBaseEntity, ICreatedAt, IUpdatedAt, IDeletable
+    public class User : IdentityUser, IBaseEntity, ICreatedAt, IUpdatedAt, IDeletable
     { 
         public int Id { get; set; }
 		public string UserName { get; set; }
@@ -25,6 +26,7 @@ namespace CampUS.Core.Models
         public virtual ICollection<User>? Followers { get; set; }
         [IgnoreDataMember]
         public virtual ICollection<User>? Following { get; set; }
-        public virtual ICollection<Club> Clubs { get; set; }
+        [IgnoreDataMember]
+        public virtual ICollection<Club>? Clubs { get; set; }
     }
 }

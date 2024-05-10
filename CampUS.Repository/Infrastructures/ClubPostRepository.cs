@@ -1,4 +1,6 @@
-﻿using CampUS.Core.Abstracts;
+﻿using Azure;
+using CampUS.Core.Abstracts;
+using CampUS.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,8 +12,10 @@ namespace CampUS.Repository.Infrastructures
 {
     public class ClubPostRepository : GenericRepository<ClubPost>, IClubPostRepository
     {
+        private readonly DbSet<ClubPost> _clubPost;
         public ClubPostRepository(AppDbContext context) : base(context)
         {
+            _clubPost = context.Set<ClubPost>();
         }
 
         public async Task<IEnumerable<ClubPost>> GetClubPostsAsync(int clubId)
@@ -21,11 +25,11 @@ namespace CampUS.Repository.Infrastructures
                                  .ToListAsync();
         }
 
-        public async Task<ClubPost> GetClubPostByIdAsync(int postId)
+        public async Task<ClubPost> GetClubPostByIdAsync(int clubPostId)
         {
             return await _context.ClubPosts
-                                 .Include(p => p.Club)
-                                 .FirstOrDefaultAsync(p => p.Id == postId && !p.IsDeleted);
+            .Include(p => p.Club)
+                         .FirstOrDefaultAsync(p => p.Id == clubPostId && !p.IsDeleted);
         }
     }
 }

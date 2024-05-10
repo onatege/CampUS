@@ -19,12 +19,6 @@ namespace CampUS.Repository.Configurations
                    .WithMany(c => c.ClubPosts)
                    .HasForeignKey(cp => cp.ClubId)
                    .OnDelete(DeleteBehavior.Cascade);
-
-            // Assuming 'Like' is a defined entity and 'Likes' is a collection in ClubPost
-            builder.HasMany(cp => cp.Likes)
-                   .WithOne()  // Specify the navigation property in Like if exists
-                   .HasForeignKey(l => l.PostId)
-                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

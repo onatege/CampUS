@@ -7,7 +7,7 @@ namespace CampUS.Core.Abstracts
 {
     public interface IClubRepository : IGenericRepository<Club>
     {
-        Task<Club> GetClubWithMembersAsync(int clubId);
-        Task RemoveByIdAsync(int clubId);
+        Task<Club> GetClubWithMembersAndPostsAsync(int clubId);
+        Task<Club> GetClubWithMembersByIdAsync(int clubId);
     }
 }

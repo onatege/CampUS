@@ -5,6 +5,7 @@ using CampUS.Core.Models;
 using CampUS.DTO.Request.User;
 using CampUS.DTO.Response;
 using CampUS.Service.Filters;
+using CampUS.Service.Exceptions;
 
 namespace CampUS.Controllers
 {
@@ -39,6 +40,20 @@ namespace CampUS.Controllers
         {
             await _userService.UpdateUserAsync(id, updateUserDto);
             return Ok(CustomResponseDto.Success(updateUserDto, HttpStatusCode.OK));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> FollowUser(int userId, int targetUserId)
+        {
+                await _userService.FollowUserAsync(userId, targetUserId);
+                return Ok(CustomResponseDto.Success(null, HttpStatusCode.OK));
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UnfollowUser(int userId, int targetUserId)
+        {
+                await _userService.UnfollowUserAsync(userId, targetUserId);
+                return Ok(CustomResponseDto.Success(null, HttpStatusCode.OK));
         }
 
         [HttpPut("[action]")]

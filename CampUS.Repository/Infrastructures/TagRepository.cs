@@ -14,7 +14,9 @@ namespace CampUS.Repository.Infrastructures
 
         public async Task<List<Tag>> GetAllTags()
         {
-            return await _tag.Include(u => u.Posts).ToListAsync();
+            // Include Posts to fetch related posts data
+            return await _tag.Include(t => t.Posts).ThenInclude(p => p.Likes)
+                             .ToListAsync();
         }
 
         public async Task<Tag> GetTagByIdAsync(int id)

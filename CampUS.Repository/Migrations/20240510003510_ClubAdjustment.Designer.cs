@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CampUS.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240503010151_AddClubFeatures")]
-    partial class AddClubFeatures
+    [Migration("20240510003510_ClubAdjustment")]
+    partial class ClubAdjustment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,11 @@ namespace CampUS.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ClubEmail")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -45,9 +50,16 @@ namespace CampUS.Repository.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -62,6 +74,9 @@ namespace CampUS.Repository.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClubEmail")
+                        .IsUnique();
+
                     b.ToTable("Clubs", (string)null);
                 });
 
@@ -73,12 +88,7 @@ namespace CampUS.Repository.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PostId1")
-                        .HasColumnType("int");
-
                     b.HasKey("PostId", "UserId");
-
-                    b.HasIndex("PostId1");
 
                     b.HasIndex("UserId");
 
@@ -320,15 +330,9 @@ namespace CampUS.Repository.Migrations
 
             modelBuilder.Entity("CampUS.Core.Models.Like", b =>
                 {
-                    b.HasOne("ClubPost", null)
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CampUS.Core.Models.Post", "Post")
                         .WithMany("Likes")
-                        .HasForeignKey("PostId1")
+                        .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -446,11 +450,6 @@ namespace CampUS.Repository.Migrations
                     b.Navigation("Likes");
 
                     b.Navigation("Posts");
-                });
-
-            modelBuilder.Entity("ClubPost", b =>
-                {
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

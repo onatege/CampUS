@@ -30,12 +30,15 @@ namespace CampUS.Service.Concrete
 
         public async Task AddClubAsync(AddClubDto addClubDto)
         {
-            if (await _clubRepository.AnyAsync(c => c.Name == addClubDto.Name))
+            if (await _clubRepository.AnyAsync(c => c.ClubEmail == addClubDto.ClubEmail))
             {
-                throw new BadRequestException($"Club with name ({addClubDto.Name}) already exists.");
+                throw new BadRequestException($"Club with email ({addClubDto.ClubEmail}) already exists.");
             }
 
             var club = _mapper.Map<Club>(addClubDto);
+            // Here, you would normally hash the password before saving
+            // club.Password = _passwordHasher.HashPassword(addClubDto.Password);
+
             await _clubRepository.AddAsync(club);
             await _unitOfWork.CommitAsync();
             string cacheKey = string.Format(ConstantCacheKeys.ClubKey, club.Id);
@@ -62,7 +65,8 @@ namespace CampUS.Service.Concrete
                 throw new NotFoundException("Club not found.");
             }
 
-            await _clubRepository.RemoveByIdAsync(clubId);
+            var club = await _clubRepository.GetByIdAsync(clubId);
+            _clubRepository.Remove(club);
             await _unitOfWork.CommitAsync();
         }
 
@@ -71,7 +75,7 @@ namespace CampUS.Service.Concrete
             if (!(await _clubRepository.AnyAsync(c => c.Id == clubId) && await _userRepository.AnyAsync(u => u.UserName == username)))
                 throw new NotFoundException("Club or user not found.");
 
-            var club = await _clubRepository.GetByIdAsync(clubId);
+            var club = await _clubRepository.GetClubWithMembersByIdAsync(clubId);
             var user = await _userRepository.Where(u => u.UserName == username).SingleOrDefaultAsync();
 
             if (club.Members.Any(m => m.Id == user.Id))
@@ -81,13 +85,13 @@ namespace CampUS.Service.Concrete
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task RemoveMemberAsync(int clubId, int userId)
+        public async Task RemoveMemberAsync(int clubId, string username)
         {
-            if (!(await _clubRepository.AnyAsync(c => c.Id == clubId) && await _userRepository.AnyAsync(u => u.Id == userId)))
+            if (!(await _clubRepository.AnyAsync(c => c.Id == clubId) && await _userRepository.AnyAsync(u => u.UserName == username)))
                 throw new NotFoundException("Club or user not found.");
 
-            var club = await _clubRepository.GetClubWithMembersAsync(clubId);
-            var user = await _userRepository.Where(u => u.Id == userId).SingleOrDefaultAsync();
+            var club = await _clubRepository.GetClubWithMembersByIdAsync(clubId);
+            var user = await _userRepository.Where(u => u.UserName == username).SingleOrDefaultAsync();
 
             if (!club.Members.Any(m => m.Id == user.Id))
                 throw new InvalidOperationException("User is not a member of this club.");
@@ -96,7 +100,7 @@ namespace CampUS.Service.Concrete
             await _unitOfWork.CommitAsync();
         }
 
-        public async Task<ClubProfileDto> GetClubProfileWithPostsAsync(int clubId)
+        public async Task<ClubProfileDto> GetClubProfileWithMembersAndPostsAsync(int clubId)
         {
             string cacheKey = string.Format(ConstantCacheKeys.ClubKey, clubId);
             ClubProfileDto clubProfileDto = null;
@@ -109,7 +113,7 @@ namespace CampUS.Service.Concrete
             if (!await _clubRepository.AnyAsync(c => c.Id == clubId))
                 throw new NotFoundException("Club not found.");
 
-            var club = await _clubRepository.GetClubWithMembersAsync(clubId);
+            var club = await _clubRepository.GetClubWithMembersAndPostsAsync(clubId);
             var profileDto = _mapper.Map<ClubProfileDto>(club);
             await _cacheService.SetAsync(cacheKey, profileDto, TimeSpan.FromMinutes(30), TimeSpan.FromHours(2));
             return profileDto;

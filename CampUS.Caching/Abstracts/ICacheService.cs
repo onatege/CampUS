@@ -7,6 +7,6 @@
 		Task SetAsync(string key, object value, TimeSpan slidingExpiration, TimeSpan absoluteExpiration);
 		Task RefreshAsync(string key);
         Task<bool> AnyAsync(string key);
-		Task RemoveAsync(string key);
+		Task RemoveAsync(string key); 
 	}
 }

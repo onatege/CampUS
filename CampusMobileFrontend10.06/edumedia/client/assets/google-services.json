@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "938972454288",
+    "project_id": "campus-90b17",
+    "storage_bucket": "campus-90b17.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938972454288:android:8f3ba69e0b4950dd66e715",
+        "android_client_info": {
+          "package_name": "com.uakkrn.edumedia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKJ2qvjnyy0eUjOfwor9Sa0A9lzT7WZl8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
